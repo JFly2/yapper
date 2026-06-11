@@ -23,16 +23,23 @@ public class AuthService {
     }
 
     //change to DTO
-    public ResponseEntity<?> login (LoginRequest loginRequest){
+    public ResponseEntity<?> login(LoginRequest request) {
 
-        User user = userRepository.findByUsername(loginRequest.username());
+        User user = userRepository.findByUsername(request.username());
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User or password is invalid");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username or password");
         }
 
-        if (!passwordEncoder.matches(loginRequest.password(),user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User or password is invalid");
+        boolean passwordMatches = passwordEncoder.matches(
+                request.password(),
+                user.getPassword()
+        );
+
+        if (!passwordMatches) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid username or password");
         }
 
         String token = jwtService.generateToken(user.getUsername());

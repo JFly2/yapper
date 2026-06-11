@@ -1,6 +1,6 @@
 package com.yapper.backend.security;
 
-
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,50 +19,73 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustUserDetailsService custUserDetailsService;
 
-    public JwtAuthFilter(JwtService jwtService, CustUserDetailsService custUserDetailsService){
+    public JwtAuthFilter(JwtService jwtService, CustUserDetailsService custUserDetailsService) {
         this.jwtService = jwtService;
         this.custUserDetailsService = custUserDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
+        String path = request.getServletPath();
 
+        if (path.startsWith("/api/auth/")){
+            filterChain.doFilter(request,response);
+            return;
+        }
         String authorizationHeader = request.getHeader("Authorization");
 
-
-        if (authorizationHeader == null){
+        if (authorizationHeader == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (!authorizationHeader.startsWith("Bearer ")){
+        if (!authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String jwtToken = authorizationHeader.substring(7);
 
-        String username = jwtService.extractUsername(jwtToken);
+        try {
+            String username = jwtService.extractUsername(jwtToken);
 
-        if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = custUserDetailsService.loadUserByUsername(username);
+            if (
+                    username != null &&
+                            SecurityContextHolder.getContext().getAuthentication() == null
+            ) {
+                UserDetails userDetails =
+                        custUserDetailsService.loadUserByUsername(username);
 
+                if (jwtService.isTokenValid(jwtToken, userDetails)) {
 
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-            if (jwtService.isTokenValid(jwtToken, userDetails)){
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request)
+                    );
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-
-                authToken.setDetails( new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authToken);
+                }
             }
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
