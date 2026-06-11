@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
-
 import "../styles/ChatBox.css";
-
+import api from "../services/api.js";
 import { MessageInput } from "./MessageInput.jsx";
 import { RoomSidebar } from "./RoomSidebar.jsx";
 import { MessageList } from "./MessageList.jsx";
@@ -73,24 +72,42 @@ export function ChatBox() {
 
     }, []);
 
-    function joinRoom(newRoomId) {
 
-        if (
-            !stompClient ||
-            !stompClient.connected
-        ) {
+    async function joinRoom(newRoomId) {
+
+        if (!stompClient) {
+            console.log("No stompClient yet");
             return;
         }
 
-        if (!newRoomId.trim()) {
+        if (!stompClient.connected) {
+            console.log("stompClient exists but is not connected");
+            return;
+        }
+
+        if (!newRoomId || !newRoomId.trim()) {
+            console.log("Invalid room id");
             return;
         }
 
         if (currentSubscription) {
+            console.log("Unsubscribing from previous room");
             currentSubscription.unsubscribe();
         }
 
-        setMessages([]);
+        try {
+            const response = await api.get(`/messages/${newRoomId}`);
+
+            console.log("Loaded room history for room: ", newRoomId);
+            console.log(response.data);
+
+            setMessages(response.data);
+
+        } catch(error){
+            console.log("Failed to load room history", error);
+            setMessages([]);
+        }
+
 
         const subscription =
             stompClient.subscribe(
@@ -141,7 +158,7 @@ export function ChatBox() {
 
         const message = {
 
-            roomId,
+            roomId: Number(roomId),
 
             content
         };

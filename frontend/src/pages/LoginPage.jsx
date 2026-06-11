@@ -39,7 +39,7 @@ export function LoginPage(){
 
            if(error.response){
 
-               if (error.response.status === 401){
+               if (error.response?.status === 401){
                    setError("Invalid username or password");
                } else {
                    setError(`Login failed: ${error.response.data?.message || "Unknown error"}`);
@@ -53,7 +53,7 @@ export function LoginPage(){
     }
 
     return (
-        <>
+        <div className={"auth-page"}>
             <div className={"login-container"}>
                <h1>Login</h1>
                <p className={"error-message"}>
@@ -86,6 +86,6 @@ export function LoginPage(){
                 </Link>
             </div>
 
-        </>
+        </div>
     );
 }

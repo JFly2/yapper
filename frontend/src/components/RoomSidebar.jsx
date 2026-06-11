@@ -1,25 +1,15 @@
 import "../styles/RoomSideBar.css";
 
-export function RoomSidebar({
+export function RoomSidebar({roomInput, setRoomInput, joinRoom}) {
 
-                                roomInput,
-
-                                setRoomInput,
-
-                                joinRoom
-
-                            }) {
-
-    function handleJoinRoom(
-        event
-    ) {
-
+    function handleJoinRoom(event) {
         event.preventDefault();
 
-        if (
-            roomInput.trim() !== ""
-        ) {
+        console.log("Button clicked");
+        console.log("roomInput", roomInput);
 
+
+        if (roomInput.trim() !== "") {
             joinRoom(roomInput);
         }
     }

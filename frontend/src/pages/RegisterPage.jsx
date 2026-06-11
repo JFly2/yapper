@@ -16,51 +16,43 @@ export function RegisterPage(){
        event.preventDefault();
        setError("");
 
-       const registerData = {
+        if (!email.includes("@")){
+            setError("Invalid email");
+            return;
+        }
+
+        const registerData = {
            email,
            username,
            password
        };
 
        try {
-           const response = api.post(
+           const response = await api.post(
                "/auth/register",
                registerData
            );
 
-           if (!email.includes("@")){
-               setError("Invalid email");
-               return;
-           }
-
-           if (response.status === 409) {
-               setError("Username or Email taken");
-               return;
-           }
-
-           if (!response.ok) {
-               setError("Registration failed. Try again.");
-               return;
-           }
-
-           const message = await response.text();
-
-           console.log(message);
-
-
+           console.log(response.data);
            console.log("User created");
 
            navigate("/login");
 
        } catch (error){
-           setError("Could not connect to server.");
+
+           if (error.response?.status === 409) {
+               setError(error.response.data);
+               return;
+           }
+
+           setError("Could not register user.");
        }
 
     }
 
 
     return (
-        <>
+        <div className={"auth-page"}>
             <div className={"register-container"}>
 
                 <h1>Register</h1>
@@ -102,6 +94,6 @@ export function RegisterPage(){
                 </Link>
             </div>
 
-        </>
+        </div>
     );
 }

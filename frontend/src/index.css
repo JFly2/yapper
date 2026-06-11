@@ -3,3 +3,12 @@ html,body, #root {
     padding: 0;
     height: 100%;
 }
+
+.auth-page {
+    min-height: 100vh;
+    background-color: rgb(0 128 0 / 0.56);
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
