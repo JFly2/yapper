@@ -2,3 +2,10 @@
     flex: 1;
     overflow-y: auto;
 }
+.empty-room-message {
+    color: #b5bac1;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 14px;
+}
+

@@ -14,6 +14,83 @@
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
-.chat-header {
+.chat-landing {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
     color: white;
+    padding: 40px;
+}
+
+.chat-landing h1 {
+    margin-bottom: 12px;
+    font-size: 32px;
+}
+
+.chat-landing p {
+    color: #b5bac1;
+    font-size: 16px;
+}
+
+.landing-actions {
+    margin-top: 24px;
+}
+
+
+.sidebar-shell {
+    width: 260px;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: width 250ms ease;
+}
+
+.sidebar-shell .room-sidebar {
+    width: 260px;
+    min-width: 260px;
+    transition:
+            transform 250ms ease,
+            opacity 200ms ease;
+}
+
+.sidebar-shell.sidebar-open {
+    width: 260px;
+}
+
+.sidebar-shell.sidebar-open .room-sidebar {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.sidebar-shell.sidebar-closed {
+    width: 0;
+}
+
+.sidebar-shell.sidebar-closed .room-sidebar {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.chat-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-toggle {
+    border: none;
+    color: white;
+    background-color: #313338;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-size: 15px;
 }

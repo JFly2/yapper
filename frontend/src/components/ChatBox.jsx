@@ -19,6 +19,11 @@ export function ChatBox() {
 
     const [messages, setMessages] = useState([]);
     const [currentSubscription, setCurrentSubscription] = useState(null);
+    const [joinedRooms, setJoinedRooms] = useState([]);
+    const [isConnected, setIsConnected] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+
+
 
     useEffect(() => {
 
@@ -40,16 +45,13 @@ export function ChatBox() {
 
             () => {
                 console.log("Connected");
-                setStompClient(
-                    stompClient
-                );
+                setStompClient(stompClient);
+                setIsConnected(true);
             },
 
             (error) => {
-                console.error(
-                    "Connection error:",
-                    error
-                );
+                console.error("Connection error:", error);
+                setIsConnected(false);
             }
         );
 
@@ -90,13 +92,16 @@ export function ChatBox() {
             return;
         }
 
+        newRoomId = newRoomId.trim();
+
         if (currentSubscription) {
             console.log("Unsubscribing from previous room");
             currentSubscription.unsubscribe();
         }
 
+
         try {
-            const response = await api.get(`/messages/${newRoomId}`);
+            const response = await api.get(`/messages/${newRoomId.trim()}`);
 
             console.log("Loaded room history for room: ", newRoomId);
             console.log(response.data);
@@ -141,6 +146,13 @@ export function ChatBox() {
         console.log(
             `Joined room ${newRoomId}`
         );
+
+        setJoinedRooms((prevRooms) => {
+            if (prevRooms.includes(newRoomId)) {
+                return prevRooms;
+            }
+           return [...prevRooms, newRoomId];
+        });
     }
 
     function sendMessage(content) {
@@ -174,43 +186,60 @@ export function ChatBox() {
     }
 
     return (
-
         <div className="chat-container">
 
-            <RoomSidebar
-
-                roomInput={roomInput}
-
-                setRoomInput={
-                    setRoomInput
-                }
-
-                joinRoom={joinRoom}
-            />
-
-            <div className="chat-main">
-
-                <div className="chat-header">
-
-                    Room:
-                    {" "}
-                    {roomId ||
-                        "No Room Selected"}
-
-                </div>
-
-                <MessageList
-                    messageList={messages}
-                />
-
-                <MessageInput
-                    sendMessage={
-                        sendMessage
-                    }
-                />
-
+            <div className={`sidebar-shell ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+                {sidebarOpen && (
+                    <RoomSidebar
+                        roomInput={roomInput}
+                        setRoomInput={setRoomInput}
+                        joinRoom={joinRoom}
+                        joinedRooms={joinedRooms}
+                        activeRoomId={roomId}
+                        isConnected={isConnected}
+                    />
+                )}
             </div>
 
+            <div className="chat-main">
+                <div className="chat-header">
+
+                    <button
+                        className={"sidebar-toggle"}
+                        type={"button"}
+                        onClick={() => setSidebarOpen((open) => (!open))}
+                        aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+                    >
+                        ☰
+                    </button>
+                    
+                    {roomId && (
+                        <span>
+                            Room: {roomId}
+                        </span>
+                    )}
+                </div>
+
+                {!roomId ? (
+                    <div className="chat-landing">
+                        <h1>Find or join a room</h1>
+
+                        <p>
+                            Join a room from the sidebar to start yapping!
+                        </p>
+
+                        <div className="landing-actions">
+                            <p>Use a room ID to join a group yap.</p>
+                            <p>Your joined rooms will appear in the sidebar.</p>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <MessageList messageList={messages} />
+                        <MessageInput sendMessage={sendMessage} />
+                    </>
+                )}
+            </div>
         </div>
     );
 }

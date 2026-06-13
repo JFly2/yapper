@@ -25,8 +25,17 @@ export function MessageInput({sendMessage}){
                 size="30"
                 value={inputText}
                 onChange={(event) => setInputText(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                        handleSendMessage();
+                    }
+                }}
             />
-            <button className={"send-button"} onClick={handleSendMessage}>send</button>
+            <button className={"send-button"}
+                    onClick={handleSendMessage}
+                    disabled={!inputText.trim()}
+            >send
+            </button>
 
 
             </div>

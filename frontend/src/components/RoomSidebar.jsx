@@ -1,17 +1,22 @@
 import "../styles/RoomSideBar.css";
+import { useNavigate } from "react-router-dom";
 
-export function RoomSidebar({roomInput, setRoomInput, joinRoom}) {
+export function RoomSidebar({roomInput, setRoomInput, joinRoom, joinedRooms, activeRoomId, isConnected}) {
+
+    const navigate = useNavigate();
 
     function handleJoinRoom(event) {
         event.preventDefault();
 
-        console.log("Button clicked");
-        console.log("roomInput", roomInput);
-
-
         if (roomInput.trim() !== "") {
-            joinRoom(roomInput);
+            joinRoom(roomInput.trim());
+            setRoomInput("");
         }
+    }
+
+    function handleLogOut(){
+        localStorage.removeItem("jwt-token");
+        navigate("/login")
     }
 
     return (
@@ -20,9 +25,7 @@ export function RoomSidebar({roomInput, setRoomInput, joinRoom}) {
             className="room-sidebar"
         >
 
-            <h2
-                className="sidebar-heading"
-            >
+            <h2 className="sidebar-heading">
                 Rooms
             </h2>
 
@@ -54,7 +57,7 @@ export function RoomSidebar({roomInput, setRoomInput, joinRoom}) {
                     !roomInput.trim()
                 }
             >
-                Join Room
+                {isConnected ? "Join Room": "Connecting..."}
             </button>
 
             <div>
@@ -65,8 +68,22 @@ export function RoomSidebar({roomInput, setRoomInput, joinRoom}) {
                     JOINED ROOMS
                 </p>
 
+                {joinedRooms.map((room) => (
+                    <button
+                        key={room}
+                        className={
+                            room === activeRoomId
+                                ? "room-item active-room"
+                                : "room-item"
+                        }
+                    onClick={() => joinRoom(room)}
+                >
+                        Room {room}
+                    </button>
+                        ))}
             </div>
 
+            <button className={"logout-button"} onClick={handleLogOut}>Log Out</button>
         </aside>
     );
 }
