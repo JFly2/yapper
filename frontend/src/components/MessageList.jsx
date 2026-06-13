@@ -1,20 +1,39 @@
+import { Fragment, useEffect, useRef } from "react";
+import { Message } from "./Message.jsx";
+import "../styles/MessageList.css";
 
-import {useEffect, useRef} from "react";
-import {Message} from "./Message.jsx";
-import "../styles/MessageList.css"
-export function MessageList ({messageList}){
+function formatMessageDate(timestamp) {
+    const messageDate = new Date(timestamp);
+    const today = new Date();
 
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) {
+        return "Today";
+    }
+
+    if (messageDate.toDateString() === yesterday.toDateString()) {
+        return "Yesterday";
+    }
+
+    return messageDate.toLocaleDateString([], {
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+export function MessageList({ messageList, currentUsername }) {
     const messageChatRef = useRef(null);
 
     useEffect(() => {
         const containerElem = messageChatRef.current;
 
-        if (containerElem){
+        if (containerElem) {
             containerElem.scrollTop = containerElem.scrollHeight;
         }
-
-    }, [messageList])
-
+    }, [messageList]);
 
     if (messageList.length === 0) {
         return (
@@ -29,21 +48,48 @@ export function MessageList ({messageList}){
         );
     }
 
-
     return (
-
         <div
-            className={"messages-container"}
+            className="messages-container"
             ref={messageChatRef}
         >
-            {messageList.map((message) => (
-                <Message
-                    key={message.id}
-                    sender={message.sender}
-                    content={message.content}
-                />
-            ))}
+            {messageList.map((message, index) => {
+                const currentDate = new Date(
+                    message.timestamp
+                ).toDateString();
 
+                const previousDate =
+                    index > 0
+                        ? new Date(
+                            messageList[index - 1].timestamp
+                        ).toDateString()
+                        : null;
+
+                const showDateDivider =
+                    currentDate !== previousDate;
+
+                return (
+                    <Fragment key={message.id}>
+                        {showDateDivider && (
+                            <div className="message-date-divider">
+                                <span>
+                                    {formatMessageDate(message.timestamp)}
+                                </span>
+                            </div>
+                        )}
+
+                        <Message
+                            sender={message.sender}
+                            content={message.content}
+                            timestamp={message.timestamp}
+                            isOwnMessage={
+                                message.sender?.toLowerCase() ===
+                                currentUsername?.toLowerCase()
+                            }
+                        />
+                    </Fragment>
+                );
+            })}
         </div>
     );
 }

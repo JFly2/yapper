@@ -1,11 +1,34 @@
 .messages-container {
     flex: 1;
     overflow-y: auto;
+    padding: 20px;
 }
 .empty-room-message {
     color: #b5bac1;
     text-align: center;
     margin-top: 40px;
     font-size: 14px;
+}
+
+.message-date-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+    color: #b5bac1;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.message-date-divider::before,
+.message-date-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #4a4d53;
+}
+
+.message-date-divider span {
+    white-space: nowrap;
 }
 
